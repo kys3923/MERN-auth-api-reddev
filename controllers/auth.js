@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const db = require('../models');
+const { createUserToken } = require('../middleware/auth');
 
 // URL prefix - /api
 
@@ -14,10 +15,15 @@ router.post('/signup', (req, res) => {
 			db.User.create({
 				name: req.body.name,
 				email: req.body.email,
-				password: hash,
+				password: hash
 			})
 		)
-		.then((createdUser) => res.json(createdUser))
+		.then((createdUser) =>
+			res.json({
+				token: createUserToken(req, createdUser),
+				user: createdUser
+			})
+		)
 		.catch((err) => {
 			console.log(`ERROR in the POST signup`, err);
 			res.json({ error: err });
@@ -36,3 +42,4 @@ router.post('/login', (req, res) => {
 });
 
 module.exports = router;
+// can check jwt token at jwt.io
